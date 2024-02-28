@@ -1,15 +1,30 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Page title</title>
-    <link rel="stylesheet" href="./sass/index.scss" />
-    <script type="module" src="./index.js"></script>
+    <link rel="stylesheet" href="./css/main.css" />
+    <script type="module" src="./js/index.js"></script>
   </head>
   <body>
-    <h1>Example title</h1>
-    <!-- ❗️❗️❗️ Add partials like so for every page -->
-    <include src="./partials/example.html"></include>
+    <header>
+      <h1 class="main-heading">Photo Seeker</h1>
+    </header>
+    <main>
+      <form class="search-form" id="search-form">
+        <input
+          class="search-input"
+          type="text"
+          name="searchQuery"
+          autocomplete="off"
+          placeholder="Search images..."
+        />
+        <button class="submit-btn" type="submit">Search</button>
+      </form>
+      <div class="gallery"></div>
+      <button type="button" class="load-more">Load more</button>
+    </main>
+    <footer></footer>
   </body>
 </html>
