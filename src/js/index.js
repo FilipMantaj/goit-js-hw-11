@@ -5,7 +5,6 @@ import { simpleLightbox } from './simplelightbox.js';
 const form = document.querySelector('#search-form');
 const input = document.querySelector('#search-form input');
 const gallery = document.querySelector('.gallery');
-const moreButton = document.querySelector('.load-more');
 
 let currentPage = 1;
 let limit;
@@ -13,22 +12,37 @@ let newLimit;
 let perPage = 0;
 let previousValue;
 
-moreButton.classList.add('hidden');
-
 form.addEventListener('submit', onSubmit);
 
 async function onSubmit(event) {
   event.preventDefault();
-  moreButton.classList.add('hidden');
+
+  if (input.value.trim('') === '') {
+    Notiflix.Notify.warning('Please fill the field with at least one word');
+    return;
+  }
 
   if (input.value === previousValue) {
     loadMore();
   } else {
     await getPictures(currentPage);
+
+    if (newLimit === 0) {
+      Notiflix.Notify.failure('There are no photos matching your query.');
+      return;
+    }
+
     gallery.innerHTML = '';
     currentPage = 1;
 
     Notiflix.Notify.success(`Hooray! We found ${newLimit} images.`);
+
+    setTimeout(() => {
+      window.scrollBy({
+        top: 160,
+        behavior: 'smooth',
+      });
+    }, 100);
   }
   await getPictures(currentPage);
 
@@ -40,7 +54,7 @@ async function getPictures(currentPage) {
     const response = await axios.get('https://pixabay.com/api/', {
       params: {
         key: '42513703-cc305044521a10f5f63ac2280',
-        q: input.value,
+        q: input.value.trim(''),
         image_type: 'photo',
         orientation: 'horizontal',
         safesearch: true,
@@ -89,11 +103,8 @@ function showPictures(pictures) {
     `;
 
     gallery.insertAdjacentHTML('beforeend', markup);
-    moreButton.classList.remove('hidden');
   });
 }
-
-moreButton.addEventListener('click', loadMore);
 
 async function loadMore() {
   try {
@@ -102,8 +113,17 @@ async function loadMore() {
 
     limit -= perPage;
 
+    const { height: cardHeight } = document
+      .querySelector('.gallery')
+      .firstElementChild.getBoundingClientRect('.photo-card');
+
+    window.scrollBy({
+      top: cardHeight,
+      behavior: 'smooth',
+    });
+
     if (limit <= 0) {
-      moreButton.classList.add('hidden');
+      window.removeEventListener('scroll', infiniteScroll);
       Notiflix.Notify.info(
         "We're sorry, but you've reached the end of search results."
       );
@@ -112,3 +132,12 @@ async function loadMore() {
     Notiflix.Notify.failure('Failed to load more photos');
   }
 }
+
+function infiniteScroll() {
+  const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+  if (scrollTop + clientHeight >= scrollHeight - 5) {
+    loadMore();
+  }
+}
+
+window.addEventListener('scroll', infiniteScroll, { passive: true });
